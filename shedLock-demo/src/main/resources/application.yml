@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: shedLock-demo
+
+  # Redis
+  data:
+    redis:
+      host: dev.me
+      port: 6379
+      password: 123456
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+  # MySQL
+  datasource:
+    url: jdbc:mysql://dev.me:3306/shedlock_demo?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # MyBatis
+  mybatis:
+    mapper-locations: classpath:mapper/*.xml   #XML Mapper
+    type-aliases-package: org.zxg.shedlockdemo.entity
+    configuration:
+      map-underscore-to-camel-case: true
+      # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # SQL
+  threads:
+    virtual:
+      enabled: true
+  task:
+    scheduling:
+      pool:
+        size: 16
+      thread-name-prefix: scheduling-
+
+shedlock:
+  default-lock-at-most-for: PT30M
+  default-lock-at-least-for: PT1M
