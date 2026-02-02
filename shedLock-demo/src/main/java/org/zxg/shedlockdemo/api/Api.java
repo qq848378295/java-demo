@@ -22,37 +22,23 @@ public class Api {
 
     @RequestMapping("/test")
     public String test() {
-        Thread.ofVirtual().start(() -> {
-            manualTaskService.triggerSettlementManually();
-        });
-        Thread.ofVirtual().start(() -> {
-            manualTaskService.triggerSettlementManually();
-        });
+        Thread.ofVirtual().start(() -> manualTaskService.triggerSettlementManually());
+        Thread.ofVirtual().start(() -> manualTaskService.triggerSettlementManually());
         return "test";
     }
 
-
     @RequestMapping("/test2")
     public String test2() {
-        Thread.ofVirtual().start(() -> {
-            manualTaskService2.triggerWithManualLock();
-        });
-        Thread.ofVirtual().start(() -> {
-            manualTaskService2.triggerWithManualLock();
-        });
+        Thread.ofVirtual().start(() -> manualTaskService2.triggerWithManualLock());
+        Thread.ofVirtual().start(() -> manualTaskService2.triggerWithManualLock());
         return "test2";
     }
 
     @RequestMapping("/simple")
     public String simple() {
-        Thread.ofVirtual().start(() -> {
-            manualTaskService2.simple();
-        });
-        Thread.ofVirtual().start(() -> {
-            manualTaskService2.simple();
-        });
+        Thread.ofVirtual().start(() -> manualTaskService2.simple());
+        Thread.ofVirtual().start(() -> manualTaskService2.simple());
         return "simple";
     }
-
 
 }

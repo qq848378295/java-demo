@@ -33,12 +33,15 @@ spring:
       # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # SQL
   threads:
     virtual:
-      enabled: true
+      enabled: false
   task:
     scheduling:
       pool:
         size: 16
       thread-name-prefix: scheduling-
+  main:
+    lazy-initialization: true
+
 
 shedlock:
   default-lock-at-most-for: PT30M
