@@ -1,1 +1,3 @@
-spring.application.name=graalvm-demo-dev
+spring:
+  application:
+    name: graalvm-demo
