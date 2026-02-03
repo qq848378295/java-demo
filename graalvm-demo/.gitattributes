@@ -7,3 +7,6 @@ application.yml merge=ours
 application-dev.yml merge=ours
 application-prod.yml merge=ours
 bootstrap.yml merge=ours
+
+
+graalvm/src/main/resources/application.yml merge=ours
