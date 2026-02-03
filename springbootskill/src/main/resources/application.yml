@@ -1,0 +1,18 @@
+# debug: true
+
+spring:
+  application:
+    name: springbootskill
+  main:
+    lazy-initialization: false
+app:
+  timeout: 30
+  name: ${spring.application.name}
+job:
+  enable: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: mystats
+
