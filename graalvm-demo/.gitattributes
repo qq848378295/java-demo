@@ -1,2 +1,10 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+
+
+application.yml merge=ours
+
+*.yml merge=ours
+application-dev.yml merge=ours
+application-prod.yml merge=ours
+bootstrap.yml merge=ours
