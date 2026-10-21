@@ -10,7 +10,7 @@ import java.util.Set;
 public class AdminUtil {
 
 
-    static Set<String> stopMsgSet = Set.of("WRONG_MAX_PRICE");
+    static Set<String> stopMsgSet = Set.of("WRONG_MAX_PRICE","不支持国家/地区");
     public static String authorization = "Bearer NGFhNmRmNmZkNmFiNGRjYzo0OjE3OTI1ODU4NjgwMTE6TWtCT0JLVGhTVEFiVzE4eG9DWWNsSk90OTZsYm1rLXdZa1lCemhKSXFUVQ";
 
     public static boolean pause(String taskId) {
