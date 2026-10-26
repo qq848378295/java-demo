@@ -1,15 +1,19 @@
-package com.sap.vibertool.sms.admin;
+package com.sap.vibertool.admin.util;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.sap.vibertool.sms.admin.util.RedisUtil;
-import io.lettuce.core.api.sync.RedisCommands;
 
-import java.util.Set;
+import com.sap.vibertool.admin.model.CountryModel;
+import com.sap.vibertool.admin.model.ResourceModel;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.*;
+
+@Slf4j
 public class AdminUtil {
 
     public static Set<String> stopMsgSet = Set.of("WRONG_MAX_PRICE", "不支持国家/地区", " 最高单价低于当前最低价");
@@ -64,9 +68,21 @@ public class AdminUtil {
     }
 
     public static JSONObject get(String url) {
+        String r = HttpUtil.createGet(url)
+                .header("user-agent", ua)
+                .header("authorization", getAuthorization()).execute().body();
+        log.info("{} \n{}", url, r);
+        return JSON.parseObject(r);
+    }
+
+    public static JSONObject get(String url, String token) {
+        token = token.replace("\n", "");
+        if (!token.startsWith("Bearer ")) {
+            token = "Bearer " + token;
+        }
         return JSON.parseObject(HttpUtil.createGet(url)
                 .header("user-agent", ua)
-                .header("authorization", getAuthorization()).execute().body());
+                .header("authorization", token).execute().body());
     }
 
     public static boolean needStop(String lastError) {
@@ -134,10 +150,16 @@ public class AdminUtil {
 
     public static void checkAuthorization() {
         //1 获取 authorization
-        RedisCommands<String, String> instance = RedisUtil.getInstance();
-        String token = instance.get("v-token");
+        String token = RedisUtil.getToken();
+        System.out.println("token:" + token);
         if (StrUtil.isNotBlank(token)) {
-            boolean valid = checkTokenValid(token);
+            try {
+                checkTokenValid(token);
+                System.out.println("checkToken 成功");
+            } catch (Exception e) {
+                RedisUtil.delToken();
+                token = null;
+            }
         }
 
         if (StrUtil.isBlank(token)) {
@@ -145,17 +167,73 @@ public class AdminUtil {
             if (!login.containsKey("code") || login.getInteger("code") != 0) {
                 throw new RuntimeException("登录失败" + login);
             }
+            System.out.println("登录 成功");
             if (login.containsKey("data") && login.getJSONObject("data").containsKey("token")) {
                 token = login.getJSONObject("data").getString("token");
+                checkTokenValid(token);
+                System.out.println("checkToken 成功");
+                RedisUtil.setToken(token);
             } else {
                 throw new RuntimeException("登录失败" + login);
             }
         }
-        //.getJSONObject("data").getString("token")
     }
 
-    private static boolean checkTokenValid(String token) {
-        authorization = "";
-        return false;
+
+    private static void checkTokenValid(String token) {
+        String u = "https://www.viber.mom/api/registration-config/countries";
+        JSONObject jsonObject = AdminUtil.get(u, token);
+        if (!jsonObject.containsKey("data")) {
+            throw new RuntimeException("checkTokenValid异常:" + jsonObject);
+        }
+        countrys(jsonObject);
+        System.out.println("更新country成功");
+        AdminUtil.authorization = token;
+        resources();
+        System.out.println("更新resources成功");
+    }
+
+    public static void countrys(JSONObject jsonObject) {
+        JSONArray jsonArray = jsonObject.getJSONArray("data");
+        System.out.println(jsonArray);
+        List<CountryModel> list = new ArrayList<>();
+        for (int i = 0; i < jsonArray.size(); i++) {
+            JSONObject json = jsonArray.getJSONObject(i);
+            CountryModel countryModel = JSON.parseObject(json.toString(), CountryModel.class);
+            if (countryModel.getEnabled()) {
+                String code = json.getString("code");
+                CountryMapping.Country model = CountryMapping.getMap().get(code);
+                if (model != null) {
+                    countryModel.setContinent(model.getContinent());
+                    list.add(countryModel);
+                } else {
+                    System.err.println("找不到对应关系:" + code);
+                }
+            }
+        }
+        RedisUtil.setCountrys(list);
+    }
+
+    public static void resources() {
+        String u = "https://www.viber.mom/api/registration-config/resources";
+        JSONObject jsonObject = get(u);
+        if (!jsonObject.containsKey("data")) {
+            throw new RuntimeException("resources异常:" + jsonObject);
+        }
+        JSONArray array = jsonObject.getJSONArray("data");
+        List<ResourceModel> list = new ArrayList<>();
+        for (int i = 0; i < array.size(); i++) {
+            JSONObject json = array.getJSONObject(i);
+            ResourceModel resourceModel = JSON.parseObject(json.toString(), ResourceModel.class);
+            if (resourceModel.getEnabled()) {
+                list.add(resourceModel);
+            }
+        }
+        RedisUtil.setResouces(JSON.toJSONString(list));
+    }
+
+    public static JSONObject registerTasks() {
+        String u = "https://www.viber.mom/api/register-tasks";
+        return AdminUtil.get(u);
     }
 }
