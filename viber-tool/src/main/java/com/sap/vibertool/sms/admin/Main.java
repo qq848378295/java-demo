@@ -12,7 +12,6 @@ public class Main {
     static void main() {
         AdminUtil.checkAuthorization();
 
-
         AdminUtil.authorization = "NGFhNmRmNmZkNmFiNGRjYzo0OjE3OTI4MDg3MjM5NzU6c29QNUI5T3dScGFKZlY1OFNuQ19JeDJ0N3VvazdrRzYzTU1SVm9GNjU2OA";
         String u = "https://www.viber.mom/api/register-tasks";
         HttpRequest request = AdminUtil.requestGet(u);

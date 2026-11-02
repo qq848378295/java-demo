@@ -9,9 +9,13 @@ import com.alibaba.fastjson2.JSONObject;
 
 import com.sap.vibertool.admin.model.CountryModel;
 import com.sap.vibertool.admin.model.ResourceModel;
+import com.sap.vibertool.admin.model.TaskModel;
+import com.sap.vibertool.admin.rule.AddTaskRule;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class AdminUtil {
@@ -21,6 +25,15 @@ public class AdminUtil {
 
     static String USERNAME = "dots";
     static String PASSWORD = "jp4jB67ripmtQut";
+
+
+    public static boolean resume(String taskId) {
+        String u = "https://www.viber.mom/api/register-tasks/" + taskId + "/resume";
+        String body = requestPost(u).execute().body();
+//        System.out.println("pause " + taskId + " " + body);
+        return isSuccess(body);
+    }
+
 
     public static boolean pause(String taskId) {
         String u = "https://www.viber.mom/api/register-tasks/" + taskId + "/pause";
@@ -235,5 +248,89 @@ public class AdminUtil {
     public static JSONObject registerTasks() {
         String u = "https://www.viber.mom/api/register-tasks";
         return AdminUtil.get(u);
+    }
+
+    public static List<TaskModel> registerTaskList() {
+        JSONObject json = AdminUtil.registerTasks();
+        JSONArray jsonArray = json.getJSONArray("data");
+        List<TaskModel> taskModels = JSONArray.parseArray(jsonArray.toJSONString(), TaskModel.class);
+        return taskModels;
+    }
+
+    private static final String ENVIRONMENT_ID = "7d588ce83d3fe424252abfac790bc8e0";
+
+
+
+    public static JSONObject addTask(String country, String proxySession, List<String> resourceIdList) {
+        String url = "https://www.viber.mom/api/register-tasks/batch";
+        List<CountryModel> countrys = RedisUtil.getCountrys();
+        CountryModel countryModel = countrys.stream().filter(e -> Objects.equals(e.getCode(), country)).findFirst().get();
+        StringJoiner sj = new StringJoiner(",");
+        countryModel.getLanguageCodes().forEach(sj::add);
+
+        JSONObject body = new JSONObject();
+        body.put("taskCount", 100);
+        body.put("threadCount", 1);
+        body.put("environmentId", ENVIRONMENT_ID);
+        body.put("integrityEnabled", true);
+        body.put("country", country);
+        body.put("mncList", "");
+        body.put("language", sj.toString());
+
+
+        body.put("platform", "ANDROID");
+        body.put("maxPriceUsd", 0);
+        body.put("proxyCountry", "");
+        body.put("startImmediately", true);
+        body.put("proxySession", proxySession);// 获取当前任务中最多的
+        body.put("resourceParams", new JSONObject());
+        body.put("resourceId", resourceIdList);
+
+        if (AddTaskRule.countryParam.containsKey(country)) {
+            JSONObject jsonObject = AddTaskRule.countryParam.get(country);
+            jsonObject.keySet().forEach(key -> {
+                body.put(key, jsonObject.get(key));
+            });
+        }
+        return AdminUtil.requestPost(url, body);
+    }
+
+    public static JSONObject addTask(JSONObject body) {
+        String url = "https://www.viber.mom/api/register-tasks/batch";
+        return AdminUtil.requestPost(url, body);
+    }
+
+
+    public static String maxProxySession(List<TaskModel> taskList) {
+        Map<String, AtomicInteger> proxySessionMap = new HashMap<>();
+
+        String maxProxySession = null;
+        int maxProxyCount = 0;
+        for (TaskModel e : taskList) {
+            String proxySession = e.getProxySession();
+            if (!proxySessionMap.containsKey(proxySession)) {
+                proxySessionMap.put(proxySession, new AtomicInteger());
+            }
+            int count = proxySessionMap.get(proxySession).incrementAndGet();
+            if (count > maxProxyCount) {
+                maxProxyCount = count;
+                maxProxySession = proxySession;
+            }
+        }
+
+//        System.out.println(maxProxySession);
+//        System.out.println(proxySessionMap);
+        return maxProxySession;
+    }
+
+    @SneakyThrows
+    public static void sleep(int i) {
+        Thread.sleep(i);
+    }
+
+    public static JSONArray registerTaskLogList() {
+        JSONObject json = get("https://www.viber.mom/api/register-tasks/logs?limit=500");
+        JSONArray jsonArray = json.getJSONArray("data");
+        return jsonArray;
     }
 }
