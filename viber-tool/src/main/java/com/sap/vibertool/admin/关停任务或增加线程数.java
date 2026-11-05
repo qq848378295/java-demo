@@ -14,13 +14,13 @@ public class 关停任务或增加线程数 {
     static void main() throws Exception {
 //        https://www.viber.mom/api/risk-analysis/task-dimensions?taskId=21cf8aba008841e2&minSamples=1&limit=5000
 
-
         AdminUtil.checkAuthorization();
         List<TaskModel> taskList = AdminUtil.registerTaskList();
 
         try {
-//            Boolean warning = true;
-//            stopTask(taskList, warning);
+            Boolean warning = true;
+//            pauseTask(taskList, warning);
+            stopTask(taskList, warning);
 
             plusThreads(taskList);
 
@@ -28,16 +28,16 @@ public class 关停任务或增加线程数 {
             e.printStackTrace();
         }
 
-
         //完成
-
-
         System.exit(0);
     }
 
     private static void plusThreads(List<TaskModel> taskList) {
         int i = 0;
         int ii = 0;
+
+        boolean change = true;
+
         for (TaskModel taskModel : taskList) {
             if (!Objects.equals("RUNNING", taskModel.getStatus())) {
                 continue;
@@ -51,7 +51,9 @@ public class 关停任务或增加线程数 {
                     if (newThreads > thread) {
                         ++i;
                         log.info("{}：需要加线程数量 {} rate:{} thread:{}》{} {}", i, taskModel.getId(), recentCodeArrivalRate, thread, newThreads, taskModel);
-                        changeThreads(taskModel, newThreads + 1);
+                        if (change) {
+                            changeThreads(taskModel, newThreads);
+                        }
                         continue;
                     }
                 }
@@ -62,14 +64,17 @@ public class 关停任务或增加线程数 {
                     ii++;
                     //成功率下降
                     log.info("{}：需要减少线程数量 {} rate:{} thread:{}》{} {}", ii, taskModel.getId(), recentCodeArrivalRate, thread, newThreads, taskModel);
-                    changeThreads(taskModel, newThreads);
+                    if (change) {
+                        changeThreads(taskModel, newThreads);
+                    }
                     continue;
                 }
-
             }
         }
         System.out.println("加线程:" + i);
         System.out.println("减线程:" + ii);
+        System.out.println("停止的" + stopTaskCount);
+
     }
 
     private static int getNewThreads(Integer recentCodeArrivalRate) {
@@ -127,8 +132,9 @@ public class 关停任务或增加线程数 {
         System.out.println("修改结果:" + jsonObject);
     }
 
-    private static void stopTask(List<TaskModel> taskList, boolean stop) {
-        int i = 0;
+    static int stopTaskCount = 0;
+
+    private static void pauseTask(List<TaskModel> taskList, boolean stop) {
         for (TaskModel taskModel : taskList) {
             Long createdAt = taskModel.getCreatedAt();
             //超过10分钟，
@@ -140,14 +146,35 @@ public class 关停任务或增加线程数 {
             }
             if (stop) {
                 if ((taskModel.getSuccessCount() <= 0 && (taskModel.getFetchCount() > 150 || taskModel.getFetchCount() == 0))) {
-                    System.out.println(++i + "\t" + taskModel.getId() + " 效果不好的\t" + taskModel);
+                    System.out.println(++stopTaskCount + "\t" + taskModel.getId() + " 效果不好的\t" + taskModel);
+//                    if (RandomUtil.randomBoolean())
+                    AdminUtil.pause(taskModel.getId());
+                    continue;
+                }
+            }
+        }
+        System.out.println("需要关闭的" + stopTaskCount);
+    }
+    private static void stopTask(List<TaskModel> taskList, boolean stop) {
+        for (TaskModel taskModel : taskList) {
+            Long createdAt = taskModel.getCreatedAt();
+            //超过10分钟，
+            if (!Objects.equals("RUNNING", taskModel.getStatus())) {
+                continue;
+            }
+            if (System.currentTimeMillis() - createdAt < 1000 * 60 * 10) {
+                continue;
+            }
+            if (stop) {
+                if ((taskModel.getSuccessCount() <= 0 && (taskModel.getFetchCount() > 150 || taskModel.getFetchCount() == 0))) {
+                    System.out.println(++stopTaskCount + "\t" + taskModel.getId() + " 效果不好的\t" + taskModel);
 //                    if (RandomUtil.randomBoolean())
                     AdminUtil.stop(taskModel.getId());
                     continue;
                 }
             }
         }
-        System.out.println("需要关闭的" + i);
+        System.out.println("需要关闭的" + stopTaskCount);
     }
 
 }

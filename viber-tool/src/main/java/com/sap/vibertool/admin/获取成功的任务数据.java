@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSONObject;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.util.AdminUtil;
 import com.sap.vibertool.admin.util.RedisUtil;
+import io.lettuce.core.MapScanCursor;
 import io.lettuce.core.api.sync.RedisCommands;
 import lombok.extern.slf4j.Slf4j;
 
@@ -54,6 +55,8 @@ public class 获取成功的任务数据 {
 
         RedisCommands<String, String> instance = RedisUtil.getInstance();
 
+        MapScanCursor<String, String> hscan = instance.hscan("");
+
         String redisKey = "task-success:" + LocalDate.now();
         String hashKey = phone + "-" + id;
         instance.hset(redisKey, hashKey, initResponse.toString());
@@ -65,7 +68,7 @@ public class 获取成功的任务数据 {
      *
      * @return
      */
-    public static boolean next(TaskModel taskModel) {
+   /* public static boolean next(TaskModel taskModel) {
         String redisKey = getRedisKey(taskModel.getCountry());
         RedisCommands<String, String> instance = RedisUtil.getInstance();
         String hashKey = getHashKey(taskModel);
@@ -83,7 +86,7 @@ public class 获取成功的任务数据 {
             }
         }
         return true;
-    }
+    }*/
 
 
     private static void taskDimensions(TaskModel taskModel, String process) {

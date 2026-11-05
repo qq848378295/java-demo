@@ -1,6 +1,7 @@
 package com.sap.vibertool.admin;
 
 import com.alibaba.fastjson2.JSONObject;
+import com.sap.vibertool.admin.constant.TaskStatus;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.util.AdminUtil;
 import com.sap.vibertool.admin.util.RedisUtil;
@@ -8,6 +9,7 @@ import io.lettuce.core.api.sync.RedisCommands;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 public class 获取有效果的任务数据 {
@@ -59,7 +61,13 @@ public class 获取有效果的任务数据 {
         JSONObject detailJson = JSONObject.parseObject(detail);
         if (detailJson.containsKey("task")) {
             JSONObject task = detailJson.getJSONObject("task");
-            if ("STOPPED".equalsIgnoreCase(task.getString("status"))) {
+            if (
+//                    "STOPPED".equalsIgnoreCase(task.getString("status"))
+                    Set.of(
+                            TaskStatus.STOPPED.name(),
+                            TaskStatus.COMPLETED.name()
+                            ).contains(task.getString("status"))
+            ) {
 //                System.err.println("之前已有数据并且是stop状态 ：" + task);
                 return false;
             }

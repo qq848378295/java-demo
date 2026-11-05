@@ -65,7 +65,7 @@ public class CountryBlackList {
 
 
 
-        resourceIdBlackMap.put("US", List.of(
+       /* resourceIdBlackMap.put("US", List.of(
                 ResourceConstant.SECOND_NUMBER,
                 ResourceConstant.SMS_BOWER,
                 ResourceConstant.GRIZZLY_SMS,
@@ -73,7 +73,7 @@ public class CountryBlackList {
                 ResourceConstant.LAO_MAO,
                 ResourceConstant.WORLDCODE,
                 ResourceConstant.TIGER_SMS
-        ));
+        ));*/
 
         //tiger
         // GR SI  UA DE CZ IT RS JP MY

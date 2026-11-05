@@ -3,21 +3,18 @@ package com.sap.vibertool.admin;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.sap.vibertool.admin.constant.ResourceConstant;
+import com.sap.vibertool.admin.constant.TaskStatus;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.rule.CountryBlackList;
 import com.sap.vibertool.admin.util.AdminUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.sap.vibertool.admin.util.CountryMapping.*;
 
 @Slf4j
 public class TaskAddByContinent {
-
 
 
     static void main() {
@@ -38,22 +35,37 @@ public class TaskAddByContinent {
         Map<String, List<String>> zhouCountryMap = new HashMap<>();
 
         zhouCountryMap.put(yazhou, List.of(
-                "PH", "MM", "TH", "AM", "VN", "IN", "HK", "JP", "MY",
+                "PH", "MM", "TH", "AM", "VN", "IN",
+                "HK", "JP", "MY",
                 "TR", "BD", "MN", "NP", "ID", "KZ", "YE", "PK", "IL", "LK", "AE", "LB", "JO", "GE", "KH", "TJ", "UZ"));
-        zhouCountryMap.put(ouzhou, List.of("GB", "PL", "FR", "ES", "EE", "GR", "SI", "UA", "DE", "NL", "CZ", "RO", "IT", "SE", "MC", "PT", "BY", "MD", "HR", "RS"));
+        zhouCountryMap.put(ouzhou, List.of(
+                "GB", "PL", "FR", "ES", "EE", "GR", "SI", "BA", "UA", "DE", "NL", "CZ",
+                "RO", "IT", "SE", "MC", "PT", "BY", "MD", "HR", "RS"));
         zhouCountryMap.put(feizhou, List.of("DZ", "CD", "MG", "EG", "LY", "KE", "NG", "AO", "TN"));
         zhouCountryMap.put(beimei, List.of("US", "DO", "TT"));
-        zhouCountryMap.put(nanmei, List.of("CO", "EC"));
+        zhouCountryMap.put(nanmei, List.of(
+                "CO",
+                "EC"));
         zhouCountryMap.put(dayang, List.of("AU", "FJ"));
 
         AdminUtil.checkAuthorization();
         List<TaskModel> taskList = AdminUtil.registerTaskList();
+
+        Set<String> taskSet = new HashSet<>();
+        taskList.forEach(e -> {
+            if (TaskStatus.RUNNING.name().equals(e.getStatus())) {
+                taskSet.add(e.getCountry() + ":" + e.getResourceId());
+            }
+        });
+
+
 //        // 创建任务
         String proxySession = AdminUtil.maxProxySession(taskList);
 
         List<String> zhouList = List.of(
-                ouzhou, feizhou,
-//                yazhou, dayang,
+                yazhou, dayang,
+                ouzhou,
+                feizhou,
                 nanmei, beimei,
                 ""
         );
@@ -83,17 +95,33 @@ public class TaskAddByContinent {
                     System.out.println(country + "匹配到黑名单" + resourceIdList + "\t" + blackList);
                 }
 
-                // hero 匹配白名单
+              /*  // hero 匹配白名单
                 if (resourceIdList.contains(ResourceConstant.HERO_SMS)) {
 
-                }
+                }*/
 
 
                 System.out.println(resourceIdList);
-                JSONObject json = AdminUtil.addTask(country, proxySession, resourceIdList);
-                log.info(country + "创建任务:" + json + "\t休眠1min");
-                //30s 提交一个国家的任务
-                AdminUtil.sleep(60 * 1000);
+                List<String> delIds = new ArrayList<>();
+                resourceIdList.forEach(id -> {
+                    String k = country + ":" + id;
+                    if (taskSet.contains(k)) {
+                        delIds.add(id);
+                    }
+                });
+                delIds.forEach(id->{
+                    resourceIdList.remove(id);
+                });
+
+
+                if (!resourceIdList.isEmpty()) {
+                    JSONObject json = AdminUtil.addTask(country, proxySession, resourceIdList);
+                    log.info(country + "创建任务:" + json + "\t休眠30s");
+                    //30s 提交一个国家的任务
+                    AdminUtil.sleep(30 * 1000);
+                } else {
+                    log.info(country + "跳过创建任务 \t休眠0s");
+                }
             }
         }
         System.exit(0);

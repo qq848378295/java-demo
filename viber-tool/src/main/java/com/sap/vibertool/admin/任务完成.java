@@ -19,14 +19,14 @@ public class 任务完成 {
     @SneakyThrows
     static void main() {
 
-        for (int i = 0; i < 30 * 24 * 12; i++) {
+        for (int i = 0; i < 30 * 24 * 30; i++) {
             try {
                 xaxxx();
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            log.info("休眠五分钟");
-            Thread.sleep(1000 * 60 * 5);
+            log.info("休眠2分钟");
+            Thread.sleep(1000 * 60 * 2);
         }
         System.exit(0);
     }
@@ -34,12 +34,15 @@ public class 任务完成 {
     private static void xaxxx() {
         AdminUtil.checkAuthorization();
         List<TaskModel> taskList = AdminUtil.registerTaskList();
-
+        int addTask = 0;
+        int warning = 0;
         RedisCommands<String, String> instance = RedisUtil.getInstance();
         for (TaskModel taskModel : taskList) {
 
             //警告
-            warning(taskModel);
+            if (warning(taskModel)) {
+                warning++;
+            }
 
             if (!"COMPLETED".equalsIgnoreCase(taskModel.getStatus())) {
                 continue;
@@ -48,16 +51,23 @@ public class 任务完成 {
             if (instance.exists(redisKey) != 0) {
                 continue;
             }
-            String msg = StrUtil.format("任务已结束id:{} {} ", taskModel.getId(), JSON.toJSONString(taskModel));
+
+//            String msg = StrUtil.format("任务已结束id:  {}  {} ", taskModel.getId(), JSON.toJSONString(taskModel));
+            String msg = StrUtil.format("任务已结束id:  {}  {} {} {} {}",
+                    taskModel.getId(), taskModel.getCountry(), taskModel.getMncList(),
+                    taskModel.getResourceProvider(), taskModel.getLanguage());
             if (DingDing.sendMsg(msg)) {
                 instance.set(redisKey, JSON.toJSONString(taskModel));
                 instance.expire(redisKey, 60 * 60 * 24 * 365); // 365d
                 JSONObject body = getJSONObject(taskModel);
                 AdminUtil.addTask(body);
+                addTask++;
             } else {
                 log.info("钉钉通知发送失败");
             }
+
         }
+        log.info("警告:{} 新建任务:{}", warning, addTask);
     }
 
     private static JSONObject getJSONObject(TaskModel taskModel) {
@@ -80,11 +90,21 @@ public class 任务完成 {
         return body;
     }
 
-    private static void warning(TaskModel taskModel) {
+    private static boolean warning(TaskModel taskModel) {
         if (TaskStatus.PAUSED.name().equals(taskModel.getStatus())) {
             if (taskModel.getLastError().startsWith("自动暂停：")) {
-                DingDing.sendMsg("自动暂停任务:" + taskModel.getId() + "\t" + JSON.toJSONString(taskModel));
+                RedisCommands<String, String> instance = RedisUtil.getInstance();
+                String redisKey = "warning:" + taskModel.getId();
+                if (instance.exists(redisKey) != 0) {
+                    if (DingDing.sendMsg("自动暂停任务:" + taskModel.getId() + "\t" + JSON.toJSONString(taskModel))) {
+                        instance.set(redisKey, JSON.toJSONString(taskModel));
+                        //30min 提醒一次
+                        instance.expire(redisKey, 60 * 30);
+                        return true;
+                    }
+                }
             }
         }
+        return false;
     }
 }
