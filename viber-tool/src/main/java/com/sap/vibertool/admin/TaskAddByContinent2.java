@@ -1,16 +1,15 @@
 package com.sap.vibertool.admin;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson2.JSONObject;
 import com.sap.vibertool.admin.constant.ResourceConstant;
+import com.sap.vibertool.admin.constant.TaskStatus;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.rule.CountryBlackList;
 import com.sap.vibertool.admin.util.AdminUtil;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.sap.vibertool.admin.util.CountryMapping.*;
 
@@ -54,24 +53,83 @@ public class TaskAddByContinent2 {
 //        // 创建任务
         String proxySession = AdminUtil.maxProxySession(taskList);
 
+
+        Set<String> taskSet = new HashSet<>();
+        taskList.forEach(e -> {
+            if (TaskStatus.RUNNING.name().equals(e.getStatus())) {
+                taskSet.add(e.getCountry() + ":" + e.getResourceId());
+            }
+        });
+
+
         List<String> strings = List.of(
-//                "BA",
-//                "SI",
-//                "BG",
-//                "IT",
-//                "LK",
-//                "PK" ,
-                "NL" ,
-                "HR" ,
-                "MC" ,
-                "PH" ,
-                "EG" ,
-                "GE" ,
-                "DE"
+                (
+                        "CD\n" +
+                        "PH\n" +
+                        "TR\n" +
+                        "BD\n" +
+                        "MM\n" +
+                        "RO\n" +
+                        "GE\n" +
+                        "HK\n" +
+                        "DZ\n" +
+                        "SI\n" +
+                        "JO\n" +
+                        "YE\n" +
+                        "ES\n" +
+                        "IN\n" +
+                        "EG\n" +
+                        "AM\n" +
+                        "PT\n" +
+                        "AU\n" +
+                        "PK\n" +
+                        "IT\n" +
+                        "DE\n" +
+                        "FR\n" +
+                        "TH\n" +
+                        "NG\n" +
+                        "KE" +
+
+//                 "BY\n" +
+//                 "TN\n" +
+//                 "MY\n" +
+//                 "LK\n" +
+//                 "EC\n" +
+//                 "MN\n" +
+//                 "BG\n" +
+//                 "DO\n" +
+//                 "VN\n" +
+//                 "UZ\n" +
+//                 "TT\n" +
+//                 "MD\n" +
+//                 "GB\n" +
+//                 "PL\n" +
+//                 "US\n" +
+//                 "KH\n" +
+//                 "TJ\n" +
+//                 "IL\n" +
+//                 "GR"
+                        ""
+                ).split("\n")
         );
+        int addTask = 0;
         for (String country : strings) {
+            if (StrUtil.isBlank(country)) {
+                continue;
+            }
+            String resource = ResourceConstant.GRIZZLY_SMS;
+//            resource = ResourceConstant.LAO_MAO;
+//            resource = ResourceConstant.WORLDCODE;
+//            resource = ResourceConstant.SMS_BOWER;
+//            resource = ResourceConstant.TIGER_SMS;
+            resource = ResourceConstant.SECOND_NUMBER;
             List<String> resourceIdList = new ArrayList<>();
-            resourceIdList.add(ResourceConstant.WORLDCODE);
+            resourceIdList.add(resource);
+
+            String k = country + ":" + resource;
+            if (taskSet.contains(k)) {
+                continue;
+            }
 
             // 判断是否有国家 ResourceId 黑名单那
             Map<String, List<String>> resourceIdBlackMap = CountryBlackList.resourceIdBlackMap;
@@ -83,12 +141,17 @@ public class TaskAddByContinent2 {
                 System.out.println(country + "匹配到黑名单" + resourceIdList + "\t" + blackList);
             }
 
+            if (resourceIdList.isEmpty()) {
+                continue;
+            }
             System.out.println(resourceIdList);
             JSONObject json = AdminUtil.addTask(country, proxySession, resourceIdList);
+            addTask++;
             log.info(country + "创建任务:" + json + "\t休眠30s");
             //30s 提交一个国家的任务
-            AdminUtil.sleep(5 * 1000);
+            AdminUtil.sleep(25 * 1000);
         }
+        log.info("最终创建任务:{}", addTask);
         System.exit(0);
     }
 }

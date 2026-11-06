@@ -1,19 +1,93 @@
 package com.sap.vibertool.admin;
 
 import com.alibaba.fastjson2.JSONObject;
-import com.sap.vibertool.admin.constant.ResourceConstant;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.util.AdminUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 
 @Slf4j
 public class 关停任务或增加线程数 {
+    /**
+     * 获取当前时间到下一个“5分钟整点”（0/5分 0秒）的毫秒数
+     *
+     * @return 距离下一个整点的毫秒数
+     */
+    public static long getMillisToNextFiveMinuteInterval() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 1. 获取当前分钟数
+        int minute = now.getMinute();
+
+        // 2. 计算需要增加的分钟数，以到达下一个 5 的倍数
+        // 例如: 12 -> 15 (加3), 15 -> 20 (加5, 因为要严格大于当前时刻，若当前秒>0)
+        // 注意：如果当前是 10:05:00.000，严格来说下一个整点是 10:10:00.000
+
+        int remainder = minute % 5;
+        int minutesToAdd;
+
+        if (remainder == 0) {
+            // 当前分钟已经是 5 的倍数 (0, 5, 10...)
+            // 检查秒和纳秒是否也为 0
+            if (now.getSecond() == 0 && now.getNano() == 0) {
+                // 正好在整点上，下一个整点是 5 分钟后
+                minutesToAdd = 5;
+            } else {
+                // 分钟对但秒不对，例如 10:05:30，下一个整点是 10:10:00
+                minutesToAdd = 5;
+            }
+        } else {
+            // 当前分钟不是 5 的倍数，例如 10:12:30，下一个整点是 10:15:00
+            minutesToAdd = 5 - remainder;
+        }
+
+        // 3. 计算目标时间
+        LocalDateTime nextInterval = now.plusMinutes(minutesToAdd)
+                .withSecond(0)
+                .withNano(0);
+
+        // 4. 计算毫秒差值
+        return ChronoUnit.MILLIS.between(now, nextInterval);
+    }
+
     static void main() throws Exception {
 //        https://www.viber.mom/api/risk-analysis/task-dimensions?taskId=21cf8aba008841e2&minSamples=1&limit=5000
+        long millisToNextFiveMinuteInterval =0L;
+//         millisToNextFiveMinuteInterval = getMillisToNextFiveMinuteInterval();
+//        if (millisToNextFiveMinuteInterval != 0) {
+//            long second = millisToNextFiveMinuteInterval / 1000;
+//            long min = second / 60;
+//            long se = second % 60;
+//            log.info("等待{}分{}秒", min, se);
+//            Thread.sleep(millisToNextFiveMinuteInterval);
+//        }
+        for (int i = 0; i < 30 * 24 * 12; i++) {
+            try {
+                log.info("{} 开始执行", i);
+                abcd();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            Thread.sleep(5000L);
+            millisToNextFiveMinuteInterval = getMillisToNextFiveMinuteInterval();
+            if (millisToNextFiveMinuteInterval != 0) {
+                long second = millisToNextFiveMinuteInterval / 1000;
+                long min = second / 60;
+                long se = second % 60;
+                log.info("休眠{}分{}秒", min, se);
+                Thread.sleep(millisToNextFiveMinuteInterval);
+            }
+        }
 
+        //完成
+        System.exit(0);
+    }
+
+    private static void abcd() {
         AdminUtil.checkAuthorization();
         List<TaskModel> taskList = AdminUtil.registerTaskList();
 
@@ -27,13 +101,11 @@ public class 关停任务或增加线程数 {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        //完成
-        System.exit(0);
     }
 
     private static void plusThreads(List<TaskModel> taskList) {
         int i = 0;
+
         int ii = 0;
 
         boolean change = true;
@@ -115,10 +187,11 @@ public class 关停任务或增加线程数 {
     }
 
     private static void changeThreads(TaskModel taskModel, int threadCount) {
-        if (taskModel.getResourceId().equalsIgnoreCase(ResourceConstant.HERO_SMS)) {
-            System.err.println("hero 不自动变更线程数");
+        /*if (taskModel.getResourceId().equalsIgnoreCase(ResourceConstant.HERO_SMS)) {
+            log.info("hero 不自动变更线程数:   {}    {}",taskModel.getId(),taskModel);
+            System.err.println("hero 不自动变更线程数:" + taskModel);
             return;
-        }
+        }*/
         JSONObject json = new JSONObject();
         json.put("taskCount", taskModel.getTaskCount());
         json.put("threadCount", threadCount);
@@ -155,6 +228,7 @@ public class 关停任务或增加线程数 {
         }
         System.out.println("需要关闭的" + stopTaskCount);
     }
+
     private static void stopTask(List<TaskModel> taskList, boolean stop) {
         for (TaskModel taskModel : taskList) {
             Long createdAt = taskModel.getCreatedAt();

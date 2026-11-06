@@ -77,7 +77,7 @@ public class TaskAddByContinent {
             List<String> strings = zhouCountryMap.get(zhou);
             for (String country : strings) {
                 List<String> resourceIdList = new ArrayList<>();
-                resourceIdList.add(ResourceConstant.GRIZZLY_SMS);
+//                resourceIdList.add(ResourceConstant.GRIZZLY_SMS);
                 resourceIdList.add(ResourceConstant.LAO_MAO);
 //                resourceIdList.add(ResourceConstant.HERO_SMS);
                 resourceIdList.add(ResourceConstant.SMS_BOWER);
@@ -118,7 +118,7 @@ public class TaskAddByContinent {
                     JSONObject json = AdminUtil.addTask(country, proxySession, resourceIdList);
                     log.info(country + "创建任务:" + json + "\t休眠30s");
                     //30s 提交一个国家的任务
-                    AdminUtil.sleep(30 * 1000);
+                    AdminUtil.sleep(20 * 1000);
                 } else {
                     log.info(country + "跳过创建任务 \t休眠0s");
                 }

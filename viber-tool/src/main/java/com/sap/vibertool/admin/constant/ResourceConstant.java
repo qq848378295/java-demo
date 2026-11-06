@@ -14,7 +14,7 @@ public class ResourceConstant {
     public static String SMS_BOWER = "a740a994692842b7";
     public static String TIGER_SMS = "3ed00ac490ef44d8";
     public static String WORLDCODE = "81036a3e8a6d48fb";
-
+//grizzly
     public static String SECOND_NUMBER = "721c4990a6dd4161";
 
     public static Map<String, String> map = new HashMap<>();
