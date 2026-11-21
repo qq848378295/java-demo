@@ -202,7 +202,11 @@ public class AdminUtil {
         countrys(jsonObject);
         System.out.println("更新country成功");
         AdminUtil.authorization = token;
-        resources();
+        try {
+            resources();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         System.out.println("更新resources成功");
     }
 
@@ -258,7 +262,6 @@ public class AdminUtil {
     }
 
     private static final String ENVIRONMENT_ID = "7d588ce83d3fe424252abfac790bc8e0";
-
 
 
     public static JSONObject addTask(String country, String proxySession, List<String> resourceIdList) {

@@ -16,6 +16,27 @@ import static com.sap.vibertool.admin.util.CountryMapping.*;
 @Slf4j
 public class TaskAddByContinent {
 
+    public static Map<String, List<String>> zhouCountryMap = new HashMap<>();
+
+    static {
+
+        zhouCountryMap.put(yazhou, List.of("BD",
+                "PH", "MM", "TH", "AM", "VN", "IN",
+                "HK", "JP", "MY",
+                "TR", "MN", "NP", "ID", "KZ", "YE", "PK", "IL", "LK", "AE", "LB", "JO", "GE", "KH", "TJ", "UZ"));
+        zhouCountryMap.put(ouzhou, List.of(
+                "GB", "PL", "FR", "ES", "EE", "GR", "SI", "BA", "UA",
+                "DE", "NL", "CZ",
+                "RO", "IT", "SE", "MC", "PT", "BY", "MD", "HR",
+                "RS"));
+        zhouCountryMap.put(feizhou, List.of("DZ", "CD", "MG", "EG", "LY", "KE", "NG", "AO", "TN"));
+        zhouCountryMap.put(beimei, List.of("US", "DO", "TT", "CL"));
+        zhouCountryMap.put(nanmei, List.of(
+                "CO",
+                "EC",
+                "BR"));
+        zhouCountryMap.put(dayang, List.of("AU", "FJ"));
+    }
 
     static void main() {
 
@@ -28,32 +49,17 @@ public class TaskAddByContinent {
 //
 //        北美洲：美国(US) 多米尼加共和国(DO) 特立尼达和多巴哥(TT)
 //
-//        南美洲：哥伦比亚(CO) 厄瓜多尔(EC)
+//        南美洲：哥伦比亚(CO) 厄瓜多尔(EC)  巴西(BR)
 //
 //        大洋洲：澳大利亚(AU) 斐济(FJ)
 
-        Map<String, List<String>> zhouCountryMap = new HashMap<>();
-
-        zhouCountryMap.put(yazhou, List.of(
-                "PH", "MM", "TH", "AM", "VN", "IN",
-                "HK", "JP", "MY",
-                "TR", "BD", "MN", "NP", "ID", "KZ", "YE", "PK", "IL", "LK", "AE", "LB", "JO", "GE", "KH", "TJ", "UZ"));
-        zhouCountryMap.put(ouzhou, List.of(
-                "GB", "PL", "FR", "ES", "EE", "GR", "SI", "BA", "UA", "DE", "NL", "CZ",
-                "RO", "IT", "SE", "MC", "PT", "BY", "MD", "HR", "RS"));
-        zhouCountryMap.put(feizhou, List.of("DZ", "CD", "MG", "EG", "LY", "KE", "NG", "AO", "TN"));
-        zhouCountryMap.put(beimei, List.of("US", "DO", "TT"));
-        zhouCountryMap.put(nanmei, List.of(
-                "CO",
-                "EC"));
-        zhouCountryMap.put(dayang, List.of("AU", "FJ"));
 
         AdminUtil.checkAuthorization();
         List<TaskModel> taskList = AdminUtil.registerTaskList();
 
         Set<String> taskSet = new HashSet<>();
         taskList.forEach(e -> {
-            if (TaskStatus.RUNNING.name().equals(e.getStatus())) {
+            if (TaskStatus.RUNNING.name().equals(e.getStatus()) || TaskStatus.PAUSED.name().equals(e.getStatus())) {
                 taskSet.add(e.getCountry() + ":" + e.getResourceId());
             }
         });
@@ -64,8 +70,7 @@ public class TaskAddByContinent {
 
         List<String> zhouList = List.of(
                 yazhou, dayang,
-                ouzhou,
-                feizhou,
+                ouzhou, feizhou,
                 nanmei, beimei,
                 ""
         );
@@ -77,13 +82,13 @@ public class TaskAddByContinent {
             List<String> strings = zhouCountryMap.get(zhou);
             for (String country : strings) {
                 List<String> resourceIdList = new ArrayList<>();
-//                resourceIdList.add(ResourceConstant.GRIZZLY_SMS);
+                resourceIdList.add(ResourceConstant.GRIZZLY_SMS);
                 resourceIdList.add(ResourceConstant.LAO_MAO);
-//                resourceIdList.add(ResourceConstant.HERO_SMS);
                 resourceIdList.add(ResourceConstant.SMS_BOWER);
                 resourceIdList.add(ResourceConstant.TIGER_SMS);
-                resourceIdList.add(ResourceConstant.WORLDCODE);
                 resourceIdList.add(ResourceConstant.SECOND_NUMBER);
+//                resourceIdList.add(ResourceConstant.WORLDCODE);
+//                resourceIdList.add(ResourceConstant.HERO_SMS);
 
                 // 判断是否有国家 ResourceId 黑名单那
                 Map<String, List<String>> resourceIdBlackMap = CountryBlackList.resourceIdBlackMap;
@@ -95,12 +100,6 @@ public class TaskAddByContinent {
                     System.out.println(country + "匹配到黑名单" + resourceIdList + "\t" + blackList);
                 }
 
-              /*  // hero 匹配白名单
-                if (resourceIdList.contains(ResourceConstant.HERO_SMS)) {
-
-                }*/
-
-
                 System.out.println(resourceIdList);
                 List<String> delIds = new ArrayList<>();
                 resourceIdList.forEach(id -> {
@@ -109,16 +108,13 @@ public class TaskAddByContinent {
                         delIds.add(id);
                     }
                 });
-                delIds.forEach(id->{
-                    resourceIdList.remove(id);
-                });
-
+                delIds.forEach(id -> resourceIdList.remove(id));
 
                 if (!resourceIdList.isEmpty()) {
                     JSONObject json = AdminUtil.addTask(country, proxySession, resourceIdList);
                     log.info(country + "创建任务:" + json + "\t休眠30s");
                     //30s 提交一个国家的任务
-                    AdminUtil.sleep(20 * 1000);
+                    AdminUtil.sleep(60 * 1000);
                 } else {
                     log.info(country + "跳过创建任务 \t休眠0s");
                 }

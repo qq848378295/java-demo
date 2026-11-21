@@ -28,7 +28,7 @@ public class CountryBlackList {
         ));
         resourceIdBlackMap.put("UA", List.of(ResourceConstant.GRIZZLY_SMS));
         resourceIdBlackMap.put("NP", List.of(ResourceConstant.GRIZZLY_SMS));
-        resourceIdBlackMap.put("JP", List.of(ResourceConstant.GRIZZLY_SMS));
+        resourceIdBlackMap.put("JP", List.of(ResourceConstant.GRIZZLY_SMS, ResourceConstant.HERO_SMS));
         resourceIdBlackMap.put("FR", List.of(ResourceConstant.GRIZZLY_SMS));
         resourceIdBlackMap.put("EC", List.of(ResourceConstant.GRIZZLY_SMS));
         resourceIdBlackMap.put("EG", List.of(ResourceConstant.GRIZZLY_SMS));

@@ -16,10 +16,14 @@ public class ResourceConstant {
     public static String WORLDCODE = "81036a3e8a6d48fb";
 //grizzly
     public static String SECOND_NUMBER = "721c4990a6dd4161";
+    public static String REDLINE = "bd38deac9c9242ef";
 
     public static Map<String, String> map = new HashMap<>();
 
     static {
+        map.put(REDLINE, "REDLINE");
+        map.put("REDLINE", REDLINE);
+
         map.put(SECOND_NUMBER, "SECOND_NUMBER");
         map.put("SECOND_NUMBER", SECOND_NUMBER);
 
