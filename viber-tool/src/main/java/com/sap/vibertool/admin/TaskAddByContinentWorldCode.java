@@ -57,8 +57,12 @@ public class TaskAddByContinentWorldCode {
                    "GB\n" +
                    "CO\n" +
                    "CI";
-        List<String> strings = new ArrayList<>(Arrays.asList(x.split("\n")));
-
+        List<String> strings =new ArrayList<>();
+        for (String s : x.split("\n")) {
+            if(!strings.contains(s)){
+                strings.add(s);
+            }
+        }
         int addTask = 0;
         for (String country : strings) {
             if (StrUtil.isBlank(country)) {

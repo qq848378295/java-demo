@@ -48,7 +48,13 @@ public class TaskAddByContinentHero {
                    "JP\n" +
                    "CL\n" +
                    "DE";
-        Set<String> strings = new HashSet<>(Arrays.asList(x.split("\n")));
+//        Set<String> strings = new HashSet<>(Arrays.asList(x.split("\n")));
+        List<String> strings =new ArrayList<>();
+        for (String s : x.split("\n")) {
+            if(!strings.contains(s)){
+                strings.add(s);
+            }
+        }
 
         int addTask = 0;
         for (String country : strings) {

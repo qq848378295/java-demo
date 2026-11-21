@@ -38,8 +38,12 @@ public class TaskAddByContinentRedline {
                    "GB\n" +
                    "GB\n" +
                    "PH";
-        Set<String> strings = new HashSet<>(Arrays.asList(x.split("\n")));
-
+        List<String> strings =new ArrayList<>();
+        for (String s : x.split("\n")) {
+            if(!strings.contains(s)){
+                strings.add(s);
+            }
+        }
         int addTask = 0;
         for (String country : strings) {
             if (StrUtil.isBlank(country)) {
