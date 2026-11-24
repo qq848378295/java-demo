@@ -7,6 +7,7 @@ import com.sap.vibertool.admin.constant.TaskStatus;
 import com.sap.vibertool.admin.model.TaskModel;
 import com.sap.vibertool.admin.rule.CountryBlackList;
 import com.sap.vibertool.admin.util.AdminUtil;
+import com.sap.vibertool.admin.util.RedLineUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
@@ -31,24 +32,97 @@ public class TaskAddByContinentRedline {
             }
         });
 
+        /**
+         AO  ago
+         AU  aut
+         BR  bra
+         CA  can
+         CL chl
+         CI civ
+         CM cmr
+         CD cod
+         CO col
+         CZ cze
+         GB eng
+         ES esp
+         GR grc
+         HK hkg
+         ID idn
+         JP jpn
+         KE ken
+         KH khm
+         LA lao
+         LR lbr
+         MA mar
+         MX mex
+         MM mmr
+         MW mwi
+         MY mys
+         NL nld
+         PH phl
+         PT prt
+         SL sle
+         SS ssd
+         TH tha
+         US usa
+         VN vnm
+         ZA zaf
+         ZM zmb
+         */
         String x = "AO\n" +
                    "AU\n" +
                    "BR\n" +
+//                   "CA\n" +
                    "CL\n" +
+                   "CI\n" +
+//                   "CM\n" +
+                   "CD\n" +
+                   "CO\n" +
+                   "CZ\n" +
                    "GB\n" +
-                   "GB\n" +
-                   "PH";
-        List<String> strings =new ArrayList<>();
+                   "ES\n" +
+                   "GR\n" +
+                   "HK\n" +
+                   "ID\n" +
+                   "JP\n" +
+                   "KE\n" +
+                   "KH\n" +
+//                   "LA\n" +
+                   "LR\n" +
+//                   "MA\n" +
+//                   "MX\n" +
+                   "MM\n" +
+//                   "MW\n" +
+                   "MY\n" +
+                   "NL\n" +
+                   "PH\n" +
+                   "PT\n" +
+//                   "SL\n" +
+//                   "SS\n" +
+                   "TH\n" +
+                   "US\n" +
+                   "VN\n" +
+                   "ZA\n"
+//                   + "ZM\n"
+                ;
+        List<String> strings = new ArrayList<>();
         for (String s : x.split("\n")) {
-            if(!strings.contains(s)){
+            if (!strings.contains(s)) {
                 strings.add(s);
             }
         }
+        strings = RedLineUtil.getIsoCodeList();
         int addTask = 0;
         for (String country : strings) {
             if (StrUtil.isBlank(country)) {
                 continue;
             }
+
+            if (Set.of("MX").contains(country)) {
+                log.info("不支持的国家:{}", country);
+                continue;
+            }
+
             List<String> resourceIdListOrigin = new ArrayList<>();
             resourceIdListOrigin.add(ResourceConstant.REDLINE);
 
@@ -83,7 +157,7 @@ public class TaskAddByContinentRedline {
 
             //30s 提交一个国家的任务
 //            AdminUtil.sleep((RandomUtil.randomInt(0, 120) + 120) * 1000);
-            AdminUtil.sleep((0  ) * 1000);
+            AdminUtil.sleep((0) * 1000);
         }
         log.info("最终创建任务:{}", addTask);
         System.exit(0);

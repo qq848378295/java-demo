@@ -253,6 +253,14 @@ public class AdminUtil {
         String u = "https://www.viber.mom/api/register-tasks";
         return AdminUtil.get(u);
     }
+    public static JSONObject worldCode() {
+        String u = "https://www.viber.mom/api/firefox/docking-users";
+        return AdminUtil.get(u);
+    }
+    public static JSONObject redLine() {
+        String u = "https://www.viber.mom/api/redline/docking-users";
+        return AdminUtil.get(u);
+    }
 
     public static List<TaskModel> registerTaskList() {
         JSONObject json = AdminUtil.registerTasks();
@@ -267,7 +275,14 @@ public class AdminUtil {
     public static JSONObject addTask(String country, String proxySession, List<String> resourceIdList) {
         String url = "https://www.viber.mom/api/register-tasks/batch";
         List<CountryModel> countrys = RedisUtil.getCountrys();
-        CountryModel countryModel = countrys.stream().filter(e -> Objects.equals(e.getCode(), country)).findFirst().get();
+        System.out.println("country:::" + country);
+        System.out.println(countrys);
+        CountryModel countryModel = null;
+        try {
+            countryModel = countrys.stream().filter(e -> Objects.equals(e.getCode(), country)).findFirst().get();
+        } catch (Exception e) {
+            log.info("未知国家:" + country);
+        }
         StringJoiner sj = new StringJoiner(",");
         countryModel.getLanguageCodes().forEach(sj::add);
 

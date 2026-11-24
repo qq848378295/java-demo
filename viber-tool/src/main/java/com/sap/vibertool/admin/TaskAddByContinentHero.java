@@ -94,7 +94,7 @@ public class TaskAddByContinentHero {
 
             //30s 提交一个国家的任务
 //            AdminUtil.sleep((RandomUtil.randomInt(0, 120) + 120) * 1000);
-            AdminUtil.sleep((20 + 120) * 1000);
+            AdminUtil.sleep((20 + 120) * 1000*0);
         }
         log.info("最终创建任务:{}", addTask);
         System.exit(0);
