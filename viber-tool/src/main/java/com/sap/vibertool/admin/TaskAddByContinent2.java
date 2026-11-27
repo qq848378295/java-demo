@@ -64,53 +64,7 @@ public class TaskAddByContinent2 {
 
         List<String> strings = List.of(
                 (
-
-                        "GE\n" +
-                        "US\n" +
-                        "DE\n" +
-                        "IN\n" +
-                        "CD\n" +
-                        "VN\n" +
-                        "PT\n" +
-                        "PH\n" +
-                        "FR\n" +
-                        "AE\n" +
-                        "AU\n" +
-                        "DZ\n" +
-                        "LR\n" +
-                        "MD\n" +
-                        "HK\n" +
-                        "AM\n" +
-                        "TR\n" +
-                        "UZ\n" +
-                        "MM\n" +
-                        "GB\n" +
-                        "TN\n" +
-                        "MN\n" +
-                        "LY\n" +
-                        "DO\n" +
-                        "RO\n" +
-                        "IT\n" +
-                        "TJ\n" +
-                        "SI\n" +
-                        "EG\n" +
-                        "LB\n" +
-                        "CI\n" +
-                        "KH\n" +
-                        "CO\n" +
-                        "BD\n" +
-                        "JO\n" +
-                        "MY\n" +
-                        "ZA\n" +
-                        "CZ\n" +
-                        "ES\n" +
-                        "YE\n" +
-                        "IL\n" +
-                        "KE\n" +
-                        "BR\n" +
-                        "CL\n" +
-                        "TH\n" +
-                        "HR"
+                        "TW\n"
                 ).split("\n")
         );
         int addTask = 0;
@@ -123,9 +77,11 @@ public class TaskAddByContinent2 {
 //            resourceIdListOrigin.add(ResourceConstant.GRIZZLY_SMS);
 //            resourceIdListOrigin.add(ResourceConstant.LAO_MAO);
 //            resourceIdListOrigin.add(ResourceConstant.WORLDCODE);
+//            resourceIdListOrigin.add(ResourceConstant.REDLINE);
 //            resourceIdListOrigin.add(ResourceConstant.SMS_BOWER);
 //            resourceIdListOrigin.add(ResourceConstant.TIGER_SMS);
-            resourceIdListOrigin.add(ResourceConstant.SECOND_NUMBER);
+//            resourceIdListOrigin.add(ResourceConstant.SECOND_NUMBER);
+            resourceIdListOrigin.add(ResourceConstant.REDLINE);
 
             List<String> resourceIdList = new ArrayList<>();
 

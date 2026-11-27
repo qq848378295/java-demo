@@ -8,19 +8,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ResourceConstant {
+    public static final String SMSBUYS = "2a3060c94e224b1f";
     public static String GRIZZLY_SMS = "675e764f21c24b13";
     public static String HERO_SMS = "ff1ad6a6fc7d44b9";
     public static String LAO_MAO = "f7f629fd64d9409b";
     public static String SMS_BOWER = "a740a994692842b7";
     public static String TIGER_SMS = "3ed00ac490ef44d8";
     public static String WORLDCODE = "81036a3e8a6d48fb";
-//grizzly
+    //grizzly
     public static String SECOND_NUMBER = "721c4990a6dd4161";
     public static String REDLINE = "bd38deac9c9242ef";
 
     public static Map<String, String> map = new HashMap<>();
 
     static {
+        map.put(SMSBUYS, "SMSBUYS");
+        map.put("SMSBUYS", SMSBUYS);
+
         map.put(REDLINE, "REDLINE");
         map.put("REDLINE", REDLINE);
 

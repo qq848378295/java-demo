@@ -15,6 +15,7 @@ public class WorldCodeUtil {
         AdminUtil.checkAuthorization();
         List<String> list = getIsoCodeList();
         log.info("list:{}:{}", list.size(), list);
+        System.exit(0);
     }
 
     public static List<String> getIsoCodeList() {

@@ -140,13 +140,16 @@ public class TaskAddByContinentRedline {
             Map<String, List<String>> resourceIdBlackMap = CountryBlackList.resourceIdBlackMap;
             if (resourceIdBlackMap.containsKey(country)) {
                 List<String> blackList = resourceIdBlackMap.get(country);
-                for (String blackResouceId : blackList) {
-                    resourceIdList.remove(blackResouceId);
+                for (String blackResourceId : blackList) {
+                    resourceIdList.remove(blackResourceId);
                 }
                 System.out.println(country + "匹配到黑名单" + resourceIdList + "\t" + blackList);
             }
 
             if (resourceIdList.isEmpty()) {
+                continue;
+            }
+            if (Set.of("AT").contains(country)) {
                 continue;
             }
 

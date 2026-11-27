@@ -3,6 +3,9 @@ package com.sap.vibertool.admin.util;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes
+ */
 public class Iso3Mapping {
     public static Map<String, String> map = new HashMap<>();
 
@@ -258,12 +261,9 @@ public class Iso3Mapping {
         map.put("ZMB", "ZM");
         map.put("ZWE", "ZW");
 
-     }
+    }
 
     public static Map<String, String> getMap() {
         return map;
     }
 }
-
-
-
